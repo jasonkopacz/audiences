@@ -14,11 +14,11 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-# audience_project/urls.py
+
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
-from views import AudienceViewSet
+from campaign_reach.views import AudienceViewSet
 
 router = routers.DefaultRouter()
 router.register(r'audiences', AudienceViewSet)
