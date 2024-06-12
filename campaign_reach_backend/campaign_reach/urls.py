@@ -18,14 +18,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
-from campaign_reach.views import AudienceViewSet
+from . import views
 
 router = routers.DefaultRouter()
-router.register(r'audiences', AudienceViewSet)
+router.register(r'audiences', views.AudienceViewSet)
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('upload_csv', views.AudienceViewSet.upload_csv, name='upload_csv'),
+    path('reach_efficiency/', views.AudienceViewSet.get_reach_efficiency_data, name='reach_efficiency'),
     path('api/', include(router.urls)),
-    path('upload-csv/', AudienceViewSet.upload_csv, name='upload_csv'),
-    path('reach-efficiency/', AudienceViewSet.get_reach_efficiency_data, name='reach_efficiency'),
 ]

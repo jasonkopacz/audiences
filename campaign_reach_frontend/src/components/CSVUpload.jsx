@@ -9,14 +9,22 @@ function CSVUpload() {
 
   const handleUpload = async () => {
     const formData = new FormData();
-    formData.append("file", file);
-
+    // console.log("upload", file);
+    if (file) {
+      // console.log("FORM DATA", file);
+      formData.append("file", file);
+    }
+    console.log(formData);
     try {
-      const response = await fetch("http://127.0.0.1:8000/upload_csv/", {
+      console.log("csv");
+
+      // const boundary = "---------------------------" + Date.now().toString(16);
+
+      const response = await fetch("http://127.0.0.1:8000/upload_csv", {
         method: "POST",
-        headers: {
-          "Content-Type": "multipart/form-data"
-        },
+        // headers: {
+        //   "Content-Type": `multipart/form-data; boundary=${boundary}`
+        // },
         body: formData
       });
 
@@ -33,8 +41,18 @@ function CSVUpload() {
 
   return (
     <div>
-      <input type="file" onChange={handleFileChange} />
+      <input type="file" id="file" onChange={handleFileChange} />
       <button onClick={handleUpload}>Upload</button>
+      {file && (
+        <section>
+          File details:
+          <ul>
+            <li>Name: {file.name}</li>
+            <li>Type: {file.type}</li>
+            <li>Size: {file.size} bytes</li>
+          </ul>
+        </section>
+      )}
     </div>
   );
 }

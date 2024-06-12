@@ -7,17 +7,23 @@ from django.http import JsonResponse
 from rest_framework import viewsets
 from .models import Audience
 from .serializers import AudienceSerializer
+from django.views.decorators.csrf import csrf_exempt
 
 class AudienceViewSet(viewsets.ModelViewSet):
+    # print(Audience.objects.all())
     queryset = Audience.objects.all()
     serializer_class = AudienceSerializer
+    @csrf_exempt
+    # exempt to save time setting up the request
+    @staticmethod
     def upload_csv(request):
         if request.method == 'POST':
             csv_file = request.FILES['file']
             df = pd.read_csv(csv_file)
             processed_data = get_efficiency_stats(df)
-
+            # print(processed_data)
             for _, row in processed_data.iterrows():
+                print('before creation')
                 Audience.objects.create(
                     zipcode=row['ZIPCODE'],
                     zip_total_people=row['ZIP_TOTAL_PEOPLE'],
@@ -25,8 +31,8 @@ class AudienceViewSet(viewsets.ModelViewSet):
                     zip_target_density=row['TARGET_DENSITY'],
                     cumulative_reach=row['CUMULATIVE_AUD_REACH']
                 )
-            return render(request, 'audience_app/upload_success.html')
-        return render(request, 'audience_app/upload.html')
+            return JsonResponse({'message': 'File uploaded successfully'})
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
 
     def get_reach_efficiency_data(request):
         reach_level = request.GET.get('reach_level', 1.0)
