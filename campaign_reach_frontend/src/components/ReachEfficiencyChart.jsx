@@ -4,7 +4,7 @@ import { Line } from "react-chartjs-2";
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
 function ReachEfficiencyChart() {
-  const { data, error } = useSWR("/api/reach-efficiency/", fetcher);
+  const { data, error } = useSWR("http://127.0.0.1/reach-efficiency/", fetcher);
 
   if (error) return <div>Failed to load data</div>;
   if (!data) return <div>Loading...</div>;
