@@ -6,3 +6,8 @@ class Audience(models.Model):
     zip_audience_people = models.IntegerField()
     zip_target_density = models.FloatField()
     cumulative_reach = models.IntegerField()
+    target_density = models.FloatField()
+    cumulative_aud_reach = models.IntegerField()
+    cumulative_total_reach = models.IntegerField()
+    cumulative_pct_reach = models.FloatField()
+    cumulative_target_density = models.FloatField()
