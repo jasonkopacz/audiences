@@ -41,8 +41,10 @@ class AudienceViewSet(viewsets.ModelViewSet):
         reach_level = request.GET.get('reach_level', 0.5)
         reach_level = float(reach_level)
         audiences = Audience.objects.all()
-        data = [
-            {
+        reach_efficiency_data = []
+
+        for audience in audiences:
+            data = {
                 'ZIPCODE': audience.zipcode,
                 'ZIP_TOTAL_PEOPLE': audience.zip_total_people,
                 'ZIP_AUDIENCE_PEOPLE': audience.zip_audience_people,
@@ -54,18 +56,15 @@ class AudienceViewSet(viewsets.ModelViewSet):
                 'CUMULATIVE_PCT_REACH': audience.cumulative_pct_reach,
                 'CUMULATIVE_TARGET_DENSITY': audience.cumulative_target_density
             }
-            for audience in audiences
-        ]
-        df = pd.DataFrame(data)
-        reach_efficiency = get_reach_efficiency(df, reach_level)
-        print(reach_efficiency)
-        reach_efficiency['zipcode_number'] = int(reach_efficiency['zipcode_number'])
-        reach_efficiency['audience_reach'] = int(reach_efficiency['audience_reach'])
-        reach_efficiency['total_reach'] = int(reach_efficiency['total_reach'])
-        
-        return JsonResponse(reach_efficiency)
-    # {'zipcode_number': 9299, 
-    # 'audience_reach': 547173, 
-    # 'total_reach': 16137474, 
-    # 'pct_reach': 0.49965629891023244, 
-    # 'target_density': 0.013828124525560816}
+        df = pd.DataFrame([data])
+        if not df.empty:
+            reach_efficiency = get_reach_efficiency(df, reach_level)
+            print(reach_efficiency)
+            if 'zipcode_number' in reach_efficiency and 'audience_reach' in reach_efficiency and 'total_reach' in reach_efficiency:
+                if not df.iloc[-1].empty and not pd.isnull(reach_efficiency['audience_reach']):
+                    reach_efficiency['zipcode_number'] = int(reach_efficiency['zipcode_number'])
+                    reach_efficiency['audience_reach'] = int(reach_efficiency['audience_reach'])
+                    reach_efficiency['total_reach'] = int(reach_efficiency['total_reach'])
+                    reach_efficiency_data.append(reach_efficiency.copy())
+        print(reach_efficiency_data)
+        return JsonResponse(reach_efficiency_data, safe=False)
