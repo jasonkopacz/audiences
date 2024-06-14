@@ -25,6 +25,5 @@ router.register(r'audiences', views.AudienceViewSet)
 
 urlpatterns = [
     path('upload_csv', views.AudienceViewSet.upload_csv, name='upload_csv'),
-    path('reach_efficiency', views.AudienceViewSet.get_reach_efficiency_data, name='reach_efficiency'),
     path('api/', include(router.urls)),
 ]

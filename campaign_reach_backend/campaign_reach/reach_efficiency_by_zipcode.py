@@ -24,21 +24,16 @@ def get_efficiency_stats(raw_df):
 
 
 def get_reach_efficiency(data, reach_level):
-    print("DATA", data)
-    print("REACH", reach_level)
-    data["ZIPCODE"] = data["ZIPCODE"].astype(str)  # Convert ZIPCODE to string type
     targeted = data[data["CUMULATIVE_PCT_REACH"] <= reach_level]
     targeted = targeted.sort_values(by="CUMULATIVE_TARGET_DENSITY", ascending=False)
-    print(targeted)
     if not targeted.empty:
-        target_density = targeted["CUMULATIVE_TARGET_DENSITY"].iloc[-1]
+        output = {
+            "zipcode_number": targeted["ZIPCODE"],
+            "audience_reach": targeted["CUMULATIVE_AUD_REACH"].max(),
+            "total_reach": targeted["CUMULATIVE_TOTAL_REACH"].max(),
+            "pct_reach": targeted["CUMULATIVE_PCT_REACH"].max(),
+            "target_density": targeted.iloc[-1]["CUMULATIVE_TARGET_DENSITY"] if not targeted.empty else None,
+        }
     else:
-        target_density = None
-    output = {
-        "zipcode_number": len(targeted),
-        "audience_reach": targeted["CUMULATIVE_AUD_REACH"].max(),
-        "total_reach": targeted["CUMULATIVE_TOTAL_REACH"].max(),
-        "pct_reach": targeted["CUMULATIVE_PCT_REACH"].max(),
-        "target_density": target_density,
-    }
+        output = {}  # Handle 
     return output

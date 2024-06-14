@@ -2,12 +2,14 @@ from django.shortcuts import render
 from .models import Audience
 import pandas as pd
 from .reach_efficiency_by_zipcode import get_efficiency_stats, get_reach_efficiency
+from .get_reach_efficiency_data import get_reach_efficiency_data
 from django.http import JsonResponse
 
 from rest_framework import viewsets
 from .models import Audience
 from .serializers import AudienceSerializer
 from django.views.decorators.csrf import csrf_exempt
+import numpy as np
 
 class AudienceViewSet(viewsets.ModelViewSet):
     queryset = Audience.objects.all()
@@ -18,53 +20,33 @@ class AudienceViewSet(viewsets.ModelViewSet):
     def upload_csv(request):
         if request.method == 'POST':
             csv_file = request.FILES['file']
-            df = pd.read_csv(csv_file, dtype={'ZIPCODE': str})
-            efficiency_stats = get_efficiency_stats(df)
+            reach_value = float(request.POST.get('reach', 0.5))
+            
+            raw_df = pd.read_csv(csv_file, dtype={'ZIPCODE': str}, index_col=False)            
+            processed_df = get_efficiency_stats(raw_df)
+            efficiency_data = processed_df.to_dict(orient='records')
+            
+            reach_data = get_reach_efficiency_data(processed_df, reach_value)
 
-            for _, row in efficiency_stats.iterrows():
-                Audience.objects.create(
-                    zipcode=row['ZIPCODE'],
-                    zip_total_people=row['ZIP_TOTAL_PEOPLE'],
-                    zip_audience_people=row['ZIP_AUDIENCE_PEOPLE'],
-                    zip_target_density=row['ZIP_TARGET_DENSITY'],
-                    cumulative_reach=row['CUMULATIVE_REACH'],
-                    target_density=row['TARGET_DENSITY'],
-                    cumulative_aud_reach=row['CUMULATIVE_AUD_REACH'],
-                    cumulative_total_reach=row['CUMULATIVE_TOTAL_REACH'],
-                    cumulative_pct_reach=row['CUMULATIVE_PCT_REACH'],
-                    cumulative_target_density=row['CUMULATIVE_TARGET_DENSITY']
-                )
-            return JsonResponse({'message': 'File uploaded successfully', 'data': efficiency_stats.to_dict(orient='records')})
+            response_data = {
+            'message': 'File uploaded successfully',
+            'data': {'reach_data': reach_data, 'efficiency_data': efficiency_data}
+        }
+            return JsonResponse(response_data)
         return JsonResponse({'error': 'Method not allowed'}, status=405)
 
-    def get_reach_efficiency_data(request):
-        reach_level = request.GET.get('reach_level', 0.5)
-        reach_level = float(reach_level)
-        audiences = Audience.objects.all()
-        reach_efficiency_data = []
-
-        for audience in audiences:
-            data = {
-                'ZIPCODE': audience.zipcode,
-                'ZIP_TOTAL_PEOPLE': audience.zip_total_people,
-                'ZIP_AUDIENCE_PEOPLE': audience.zip_audience_people,
-                'ZIP_TARGET_DENSITY': audience.zip_target_density,
-                'CUMULATIVE_REACH': audience.cumulative_reach,
-                'TARGET_DENSITY': audience.target_density,
-                'CUMULATIVE_AUD_REACH': audience.cumulative_aud_reach,
-                'CUMULATIVE_TOTAL_REACH': audience.cumulative_total_reach,
-                'CUMULATIVE_PCT_REACH': audience.cumulative_pct_reach,
-                'CUMULATIVE_TARGET_DENSITY': audience.cumulative_target_density
-            }
-        df = pd.DataFrame([data])
-        if not df.empty:
-            reach_efficiency = get_reach_efficiency(df, reach_level)
-            print(reach_efficiency)
-            if 'zipcode_number' in reach_efficiency and 'audience_reach' in reach_efficiency and 'total_reach' in reach_efficiency:
-                if not df.iloc[-1].empty and not pd.isnull(reach_efficiency['audience_reach']):
-                    reach_efficiency['zipcode_number'] = int(reach_efficiency['zipcode_number'])
-                    reach_efficiency['audience_reach'] = int(reach_efficiency['audience_reach'])
-                    reach_efficiency['total_reach'] = int(reach_efficiency['total_reach'])
-                    reach_efficiency_data.append(reach_efficiency.copy())
-        print(reach_efficiency_data)
-        return JsonResponse(reach_efficiency_data, safe=False)
+# Next Step: Create Audience Model to save and cache file upload data
+       # for _, row in efficiency_stats.iterrows():
+            #     Audience.objects.create(
+            #         zipcode=row['ZIPCODE'],
+            #         zip_total_people=row['ZIP_TOTAL_PEOPLE'],
+            #         zip_audience_people=row['ZIP_AUDIENCE_PEOPLE'],
+            #         zip_target_density=row['ZIP_TARGET_DENSITY'],
+            #         cumulative_reach=row['CUMULATIVE_REACH'],
+            #         target_density=row['TARGET_DENSITY'],
+            #         cumulative_aud_reach=row['CUMULATIVE_AUD_REACH'],
+            #         cumulative_total_reach=row['CUMULATIVE_TOTAL_REACH'],
+            #         cumulative_pct_reach=row['CUMULATIVE_PCT_REACH'],
+            #         cumulative_target_density=row['CUMULATIVE_TARGET_DENSITY']
+            #     )
+            # return JsonResponse({'message': 'File uploaded successfully', 'data': efficiency_stats.to_dict(orient='records')})

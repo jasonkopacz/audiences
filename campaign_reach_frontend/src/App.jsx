@@ -2,7 +2,7 @@ import CSVUpload from "./components/CSVUpload";
 
 function App() {
   return (
-    <div>
+    <div className="appContainer">
       <h1>Audience Data Analysis</h1>
       <CSVUpload />
     </div>

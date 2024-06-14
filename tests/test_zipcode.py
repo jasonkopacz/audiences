@@ -1,4 +1,4 @@
-from src.reach_efficiency_by_zipcode import get_efficiency_stats, get_reach_efficiency
+from cli.reach_efficiency_by_zipcode import get_efficiency_stats, get_reach_efficiency
 
 import pandas
 

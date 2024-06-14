@@ -6,6 +6,7 @@ import {
   LinearScale,
   PointElement,
   LineElement,
+  BarElement,
   Title,
   Tooltip,
   Legend
@@ -16,34 +17,64 @@ ChartJS.register(
   LinearScale,
   PointElement,
   LineElement,
+  BarElement,
   Title,
   Tooltip,
   Legend
 );
 
-const DataChart = ({ efficiencyData, reachData }) => {
+const DataChart = ({ efficiencyData }) => {
   // Transform data for chart
-  const reachLevels = efficiencyData.map((item) => item.CUMULATIVE_REACH);
-  const efficiencies = efficiencyData.map((item) => item.ZIP_TARGET_DENSITY);
-  const totalPeople = efficiencyData.map((item) => item.ZIP_TOTAL_PEOPLE);
   const zipcodes = efficiencyData.map((item) => item.ZIPCODE);
+  const cumulativeAudReach = efficiencyData.map(
+    (item) => item.CUMULATIVE_AUD_REACH * 100
+  );
+  const cumulativeTotalReach = efficiencyData.map(
+    (item) => item.CUMULATIVE_TOTAL_REACH
+  );
+  const cumulativePctReach = efficiencyData.map(
+    (item) => item.CUMULATIVE_PCT_REACH * 100
+  );
+  const cumulativeTargetDensity = efficiencyData.map(
+    (item) => item.CUMULATIVE_TARGET_DENSITY * 100
+  );
 
   const chartData = {
-    labels: reachLevels,
+    labels: zipcodes,
     datasets: [
       {
-        label: "Target Density",
-        data: efficiencies,
+        type: "line",
+        label: "Cumulative Audience Reach",
+        data: cumulativeAudReach,
         borderColor: "rgba(75, 192, 192, 1)",
         backgroundColor: "rgba(75, 192, 192, 0.2)",
         fill: true,
         yAxisID: "y1"
       },
       {
-        label: "Total People",
-        data: totalPeople,
+        type: "line",
+        label: "Cumulative Total Reach",
+        data: cumulativeTotalReach,
         borderColor: "rgba(255, 99, 132, 1)",
         backgroundColor: "rgba(255, 99, 132, 0.2)",
+        fill: true,
+        yAxisID: "y1"
+      },
+      {
+        type: "line",
+        label: "Cumulative % Reach",
+        data: cumulativePctReach,
+        borderColor: "rgba(54, 162, 235, 1)",
+        backgroundColor: "rgba(54, 162, 235, 0.2)",
+        fill: true,
+        yAxisID: "y1"
+      },
+      {
+        type: "line",
+        label: "Cumulative Target Density",
+        data: cumulativeTargetDensity,
+        borderColor: "rgba(153, 102, 255, 1)",
+        backgroundColor: "rgba(153, 102, 255, 0.2)",
         fill: true,
         yAxisID: "y2"
       }
@@ -58,7 +89,7 @@ const DataChart = ({ efficiencyData, reachData }) => {
       },
       title: {
         display: true,
-        text: "Target Density and Total People vs. Cumulative Reach"
+        text: "Cumulative Metrics vs. Zipcodes"
       },
       tooltip: {
         callbacks: {
@@ -76,7 +107,7 @@ const DataChart = ({ efficiencyData, reachData }) => {
       x: {
         title: {
           display: true,
-          text: "Cumulative Reach"
+          text: "Zipcodes"
         }
       },
       y1: {
@@ -85,7 +116,7 @@ const DataChart = ({ efficiencyData, reachData }) => {
         position: "left",
         title: {
           display: true,
-          text: "Target Density"
+          text: "Reach Metrics"
         },
         beginAtZero: true
       },
@@ -95,7 +126,7 @@ const DataChart = ({ efficiencyData, reachData }) => {
         position: "right",
         title: {
           display: true,
-          text: "Total People"
+          text: "Cumulative Target Density"
         },
         beginAtZero: true,
         grid: {

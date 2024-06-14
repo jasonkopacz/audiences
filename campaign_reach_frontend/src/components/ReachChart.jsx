@@ -1,7 +1,4 @@
-import React from "react";
-import { useEffect, useRef } from "react";
-import useSWR from "swr";
-import { Bar, Line } from "react-chartjs-2";
+import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -26,7 +23,6 @@ ChartJS.register(
 );
 
 function ReachChart({ reachData }) {
-  // Extracting reach data for the chart
   const reachLevels = reachData.map((item) => item.total_reach);
   const efficiencies = reachData.map((item) => item.pct_reach * 100);
   const targetDensities = reachData.map((item) => item.target_density * 100);
@@ -111,7 +107,6 @@ function ReachChart({ reachData }) {
 
   return (
     <div>
-      <h2>Reach Efficiency Chart</h2>
       <Line data={chartData} options={options} />
     </div>
   );
